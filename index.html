@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find the Words in Sequence!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('your-image.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: goldenrod;
+            color: royalblue;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .title {
+            background-color: #28a745; /* Green background */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .title .blinking-text {
+            animation: blinkText 1.5s infinite;
+        }
+
+        @keyframes blinkText {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        #grid-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(25, 30px);
+            gap: 2px;
+        }
+
+        .cell {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            font-weight: bold;
+            background: #f9f9f9;
+            transition: background-color 0.3s, transform 0.2s;
+            cursor: pointer;
+        }
+
+        .cell:hover {
+            background-color: #e0e0e0;
+            transform: scale(1.1);
+        }
+
+        .cell.selected {
+            background-color: yellow; /* Highlighting color updated */
+        }
+
+        .congrats-message {
+            display: none;
+            background-color: #28a745;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            font-size: 1.5rem;
+            text-align: center;
+            animation: blinkText 1.5s infinite;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 20px;
+            display: block;
+        }
+
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        #rules, #clues {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            max-width: 300px;
+            font-size: 0.9rem;
+        }
+
+        #rules h3, #clues h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        #rules ul, #clues ul {
+            padding-left: 20px;
+            list-style-type: disc;
+        }
+
+        #rules li {
+            margin-bottom: 10px;
+        }
+
+        #rules li:last-child {
+            color: red;
+            font-weight: bold;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">ABMCPL Learning Fest 2024</div>
+    <div class="title">
+        <span class="blinking-text">Find the Words in Sequence!</span>
+    </div>
+    <div id="grid-container">
+        <div class="side-panel">
+            <div id="rules">
+                <h3>Rules</h3>
+                <ul>
+                    <li>Click and drag to select letters forming the words.</li>
+                    <li>Click on selected letters to deselect them if needed.</li>
+                    <li>All words must be found in the sequence of clues.</li>
+                    <li style="color: red;">All the words must be found in the sequence of clues.</li>
+                </ul>
+            </div>
+        </div>
+        <div id="grid"></div>
+        <div class="side-panel">
+            <div id="clues">
+                <h3>Clues</h3>
+                <ul>
+                    <li>GYANODAYA: The process of enlightening the mind.</li>
+                    <li>GROWTHMINDSET: Belief in the ability to grow.</li>
+                    <li>FITFORFUTURE: Being prepared for upcoming challenges.</li>
+                    <li>RISKMANAGEMENT: Process of managing risks.</li>
+                    <li>INFLUENCING: The ability to impact others.</li>
+                    <li>MACROECONOMICS: The study of the economy as a whole.</li>
+                </ul>
+            </div>
+            <button id="submit-button" disabled>Submit</button>
+            <div class="congrats-message" id="congrats-message"></div>
+        </div>
+    </div>
+
+    <script>
+        const gridSize = 25;
+        const words = ['GYANODAYA', 'GROWTHMINDSET', 'FITFORFUTURE', 'RISKMANAGEMENT', 'INFLUENCING', 'MACROECONOMICS'];
+        let grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+        let foundWords = {};
+        let selectedCells = [];
+        let startTime;
+        let endTime;
+
+        function createGrid() {
+            const gridContainer = document.getElementById('grid');
+            gridContainer.innerHTML = '';
+
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.textContent = grid[row][col];
+                    cell.addEventListener('mousedown', handleCellClick);
+                    cell.addEventListener('mouseover', handleCellHover);
+                    gridContainer.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellClick(event) {
+            if (event.buttons === 1) { // Only handle mouse button down
+                const cell = event.target;
+                if (cell.classList.contains('selected')) {
+                    cell.classList.remove('selected');
+                    removeSelectedCell(cell.dataset.row, cell.dataset.col);
+                } else {
+                    cell.classList.add('selected');
+                    addSelectedCell(cell.dataset.row, cell.dataset.col);
+                }
+                updateSubmitButtonState();
+            }
+        }
+
+        function handleCellHover(event) {
+            if (event.buttons === 1) {
+                const cell = event.target;
+                if (!cell.classList.contains('selected')) {
+                    cell.classList.add('selected');
+                    addSelectedCell(cell.dataset.row, cell.dataset.col);
+                }
+                updateSubmitButtonState();
+            }
+        }
+
+        function addSelectedCell(row, col) {
+            selectedCells.push({ row: parseInt(row), col: parseInt(col) });
+        }
+
+        function removeSelectedCell(row, col) {
+            selectedCells = selectedCells.filter(cell => cell.row !== parseInt(row) || cell.col !== parseInt(col));
+        }
+
+        function updateSubmitButtonState() {
+            const allWordsFound = words.every(word => isWordFullySelected(word));
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = !allWordsFound;
+        }
+
+        function isWordFullySelected(word) {
+            const directions = [
+                { rowInc: 0, colInc: 1 }, // Horizontal
+                { rowInc: 1, colInc: 0 }, // Vertical
+                { rowInc: 1, colInc: 1 }, // Diagonal down-right
+                { rowInc: 1, colInc: -1 } // Diagonal down-left
+            ];
+
+            function checkDirection(startRow, startCol, rowInc, colInc) {
+                for (let i = 0; i < word.length; i++) {
+                    const r = startRow + i * rowInc;
+                    const c = startCol + i * colInc;
+                    if (!selectedCells.some(cell => cell.row === r && cell.col === c && grid[r][c] === word[i])) return false;
+                }
+                return true;
+            }
+
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    for (const { rowInc, colInc } of directions) {
+                        if (checkDirection(r, c, rowInc, colInc)) {
+                            foundWords[word] = true;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            foundWords[word] = false;
+            return false;
+        }
+
+        function placeWord(word) {
+            let placed = false;
+            while (!placed) {
+                const direction = Math.random() < 0.5 ? 'H' : 'V'; // Horizontal or Vertical
+                const row = Math.floor(Math.random() * gridSize);
+                const col = Math.floor(Math.random() * gridSize);
+
+                if (canPlaceWord(word, row, col, direction)) {
+                    for (let i = 0; i < word.length; i++) {
+                        if (direction === 'H') {
+                            grid[row][col + i] = word[i];
+                        } else {
+                            grid[row + i][col] = word[i];
+                        }
+                    }
+                    placed = true;
+                    foundWords[word] = false; // Initialize word status
+                }
+            }
+        }
+
+        function canPlaceWord(word, row, col, direction) {
+            if (direction === 'H') {
+                if (col + word.length > gridSize) return false;
+                for (let i = 0; i < word.length; i++) {
+                    if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) return false;
+                }
+            } else {
+                if (row + word.length > gridSize) return false;
+                for (let i = 0; i < word.length; i++) {
+                    if (grid[row + i][col] !== '' && grid[row + i][col] !== word[i]) return false;
+                }
+            }
+            return true;
+        }
+
+        function fillRandomLetters() {
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    if (grid[row][col] === '') {
+                        grid[row][col] = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
+                    }
+                }
+            }
+        }
+
+        function checkIfWordsFound() {
+            if (Object.values(foundWords).every(found => found)) {
+                endTime = new Date();
+                const timeTaken = Math.round((endTime - startTime) / 1000);
+                const message = document.getElementById('congrats-message');
+                message.textContent = `Congratulations, you have found all the words in ${timeTaken} seconds!`;
+                message.style.display = 'block';
+            }
+        }
+
+        document.getElementById('submit-button').addEventListener('click', function() {
+            if (Object.values(foundWords).every(found => found)) {
+                checkIfWordsFound();
+            } else {
+                alert('Please find and select all the words before submitting.');
+            }
+        });
+
+        function initGame() {
+            startTime = new Date();
+            words.forEach(placeWord);
+            fillRandomLetters();
+            createGrid();
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
